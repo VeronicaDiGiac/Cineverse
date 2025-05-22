@@ -20,6 +20,9 @@ importers:
       '@payloadcms/richtext-lexical':
         specifier: 3.33.0
         version: 3.33.0(@faceless-ui/modal@3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@faceless-ui/scroll-info@2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@payloadcms/next@3.33.0(@types/react@19.1.0)(graphql@16.11.0)(monaco-editor@0.52.2)(next@15.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(payload@3.33.0(graphql@16.11.0)(typescript@5.7.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.7.3))(@types/react@19.1.0)(monaco-editor@0.52.2)(next@15.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(payload@3.33.0(graphql@16.11.0)(typescript@5.7.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.7.3)(yjs@13.6.27)
+      cineverse-backend:
+        specifier: 'file:'
+        version: file:(@aws-sdk/credential-providers@3.812.0)(@faceless-ui/modal@3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@faceless-ui/scroll-info@2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@types/react@19.1.0)(monaco-editor@0.52.2)(sass@1.77.4)(typescript@5.7.3)(yjs@13.6.27)
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -1619,6 +1622,10 @@ packages:
   ci-info@4.2.0:
     resolution: {integrity: sha512-cYY9mypksY8NRqgDB1XD1RiJL338v/551niynFTGkZOO2LHuB2OmOYxDIe/ttN9AHwrqdum1360G3ald0W9kCg==}
     engines: {node: '>=8'}
+
+  'cineverse-backend@file:':
+    resolution: {directory: '', type: directory}
+    engines: {node: ^18.20.2 || >=20.9.0, pnpm: ^9 || ^10}
 
   classnames@2.5.1:
     resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
@@ -5631,6 +5638,46 @@ snapshots:
   chownr@1.1.4: {}
 
   ci-info@4.2.0: {}
+
+  cineverse-backend@file:(@aws-sdk/credential-providers@3.812.0)(@faceless-ui/modal@3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@faceless-ui/scroll-info@2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@types/react@19.1.0)(monaco-editor@0.52.2)(sass@1.77.4)(typescript@5.7.3)(yjs@13.6.27):
+    dependencies:
+      '@payloadcms/db-mongodb': 3.33.0(@aws-sdk/credential-providers@3.812.0)(payload@3.33.0(graphql@16.11.0)(typescript@5.7.3))
+      '@payloadcms/next': 3.33.0(@types/react@19.1.0)(graphql@16.11.0)(monaco-editor@0.52.2)(next@15.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(payload@3.33.0(graphql@16.11.0)(typescript@5.7.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.7.3)
+      '@payloadcms/payload-cloud': 3.33.0(payload@3.33.0(graphql@16.11.0)(typescript@5.7.3))
+      '@payloadcms/richtext-lexical': 3.33.0(@faceless-ui/modal@3.0.0-beta.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@faceless-ui/scroll-info@2.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@payloadcms/next@3.33.0(@types/react@19.1.0)(graphql@16.11.0)(monaco-editor@0.52.2)(next@15.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(payload@3.33.0(graphql@16.11.0)(typescript@5.7.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.7.3))(@types/react@19.1.0)(monaco-editor@0.52.2)(next@15.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4))(payload@3.33.0(graphql@16.11.0)(typescript@5.7.3))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.7.3)(yjs@13.6.27)
+      cross-env: 7.0.3
+      graphql: 16.11.0
+      next: 15.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
+      payload: 3.33.0(graphql@16.11.0)(typescript@5.7.3)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      sharp: 0.32.6
+    transitivePeerDependencies:
+      - '@aws-sdk/credential-providers'
+      - '@babel/core'
+      - '@faceless-ui/modal'
+      - '@faceless-ui/scroll-info'
+      - '@mongodb-js/zstd'
+      - '@opentelemetry/api'
+      - '@playwright/test'
+      - '@types/react'
+      - aws-crt
+      - babel-plugin-macros
+      - babel-plugin-react-compiler
+      - bare-buffer
+      - bufferutil
+      - encoding
+      - gcp-metadata
+      - kerberos
+      - monaco-editor
+      - mongodb-client-encryption
+      - sass
+      - snappy
+      - socks
+      - supports-color
+      - typescript
+      - utf-8-validate
+      - yjs
 
   classnames@2.5.1: {}
 
