@@ -198,8 +198,8 @@ export interface Movie {
   description?: string | null;
   releaseYear: number;
   director?: string | null;
-  coverUrl?: string | null;
-  videoUrl?: string | null;
+  cover?: (string | null) | Media;
+  video?: (string | null) | Media;
   actors?:
     | {
         actorName?: string | null;
@@ -406,8 +406,8 @@ export interface MoviesSelect<T extends boolean = true> {
   description?: T;
   releaseYear?: T;
   director?: T;
-  coverUrl?: T;
-  videoUrl?: T;
+  cover?: T;
+  video?: T;
   actors?:
     | T
     | {
