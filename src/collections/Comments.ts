@@ -1,8 +1,31 @@
 import type { CollectionConfig } from 'payload'
+// import type { Comment, User } from '@/payload-types'
 
 export const Comments: CollectionConfig = {
   slug: 'comments',
   admin: { useAsTitle: 'id' },
+
+  access: {
+    // read: () => true,
+    // create: ({ req }) => {
+    //   const user = req.user as User | undefined
+    //   return !!user
+    // },
+    // update: async (args: AccessArgs<Comment>): Promise<boolean> => {
+    //   const { req, doc } = args
+    //   const user = req.user as User | undefined
+    //   if (!user || !doc) return false
+    //   const userId = typeof doc.user === 'string' ? doc.user : doc.user?.id
+    //   return userId === user.id || user.role === 'admin'
+    // },
+    // delete: async (args: AccessArgs<Comment>): Promise<boolean> => {
+    //   const { req, doc } = args
+    //   const user = req.user as User | undefined
+    //   if (!user || !doc) return false
+    //   const userId = typeof doc.user === 'string' ? doc.user : doc.user?.id
+    //   return userId === user.id || user.role === 'admin'
+    // },
+  },
 
   fields: [
     {
