@@ -256,10 +256,12 @@ export interface Follow {
   updatedAt: string
   createdAt: string
 }
+
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "comments".
  */
+
 export interface Comment {
   id: string
   user: string | User
