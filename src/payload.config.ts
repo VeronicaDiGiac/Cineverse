@@ -11,9 +11,8 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Movies } from './collections/Movies'
 import { Reviews } from './collections/Reviews'
-import { Follows } from './collections/Follows'
-import { Comments } from './collections/Comments'
-import { Wishlists } from './collections/Wishlist'
+import { Articles } from './collections/Article'
+import { Newsletter } from './collections/Newsletter'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Movies, Reviews, Follows, Comments, Wishlists],
+  collections: [Users, Media, Movies, Reviews, Articles, Newsletter],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

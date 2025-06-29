@@ -4,6 +4,12 @@ import { headersWithCors } from 'payload'
 
 export const Movies: CollectionConfig = {
   slug: 'movies',
+  access: {
+    create: ({ req }) => req.user?.role === 'admin',
+    read: () => true,
+    update: ({ req }) => req.user?.role === 'admin',
+    delete: ({ req }) => req.user?.role === 'admin',
+  },
   admin: {
     useAsTitle: 'title',
   },
