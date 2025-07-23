@@ -18,6 +18,29 @@ export const Articles: CollectionConfig = {
       required: true,
     },
     {
+      name: 'writer',
+      type: 'relationship',
+      relationTo: 'writers',
+      required: true,
+      label: 'Scrittore',
+    },
+    {
+      name: 'articleType',
+      type: 'select',
+      required: true,
+      defaultValue: 'generale',
+      options: [
+        { label: 'Cinema', value: 'cinema' },
+        { label: 'Gossip', value: 'gossip' },
+        { label: 'Attualità', value: 'attualita' },
+        { label: 'Premi e Festival', value: 'premi' },
+        { label: 'Backstage', value: 'backstage' },
+        { label: 'Intervista', value: 'intervista' },
+        { label: 'Generale', value: 'generale' },
+      ],
+      label: 'Categoria Articolo',
+    },
+    {
       name: 'content',
       type: 'textarea',
       required: true,
@@ -30,8 +53,15 @@ export const Articles: CollectionConfig = {
       label: 'Immagine principale dell’articolo',
     },
     {
+      name: 'movieTitle',
+      type: 'text',
+      required: false,
+      label: 'Titolo del film (se applicabile)',
+    },
+    {
       name: 'actors',
       type: 'array',
+      required: false,
       fields: [
         {
           name: 'actorName',
@@ -42,11 +72,13 @@ export const Articles: CollectionConfig = {
     {
       name: 'director',
       type: 'text',
+      required: false,
     },
     {
       name: 'genre',
       type: 'select',
       hasMany: true,
+      required: false,
       options: [
         { label: 'Drammatico', value: 'drammatico' },
         { label: 'Storico', value: 'storico' },
@@ -67,6 +99,16 @@ export const Articles: CollectionConfig = {
         { label: 'Western', value: 'western' },
         { label: 'Famiglia', value: 'famiglia' },
       ],
+    },
+    // Voti degli utenti (anonimi)
+    {
+      name: 'votes',
+      type: 'number',
+      defaultValue: 0,
+      // Admin non deve poter inserire voti manuali perchè quello è compito dell utente anonimo lato frontend
+      admin: {
+        readOnly: true,
+      },
     },
   ],
 
@@ -135,5 +177,57 @@ export const Articles: CollectionConfig = {
         return Response.json(articles)
       },
     },
+
+    // Filtro per tipo articolo
+    {
+      path: '/byType',
+      method: 'get',
+      handler: async (req: PayloadRequest) => {
+        const { type } = req.query
+
+        if (!type) {
+          return Response.json({ error: 'Missing type' }, { status: 400 })
+        }
+
+        const articles = await req.payload.find({
+          collection: 'articles',
+          where: { articleType: { equals: type } },
+          sort: '-createdAt',
+        })
+
+        return Response.json(articles)
+      },
+    },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        // Solo se il documento è stato aggiornato (non creato)
+        if (operation !== 'update') return
+
+        const writerId = doc.writer
+        if (!writerId) return
+
+        // Prendi tutte le review scritte da questo autore
+        const reviews = await req.payload.find({
+          collection: 'articles',
+          where: { writer: { equals: writerId } },
+        })
+
+        // Somma voti e conteggio
+        const voteTotal = reviews.docs.reduce((sum, r) => sum + (r.votes || 0), 0)
+        const voteCount = reviews.docs.length
+
+        // Aggiorna lo scrittore
+        await req.payload.update({
+          collection: 'writers',
+          id: writerId,
+          data: {
+            voteTotal,
+            voteCount,
+          },
+        })
+      },
+    ],
+  },
 }

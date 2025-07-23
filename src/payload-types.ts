@@ -69,10 +69,10 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    movies: Movie;
-    reviews: Review;
+    review: Review;
     articles: Article;
     newsletter: Newsletter;
+    writers: Writer;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -81,10 +81,10 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    movies: MoviesSelect<false> | MoviesSelect<true>;
-    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    review: ReviewSelect<false> | ReviewSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     newsletter: NewsletterSelect<false> | NewsletterSelect<true>;
+    writers: WritersSelect<false> | WritersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -128,12 +128,10 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   username: string;
-  avatarUrl?: (string | null) | Media;
-  bio?: string | null;
   /**
-   * Ruolo definito dall'admin
+   * Ruolo fisso: solo admin
    */
-  role: 'admin' | 'user';
+  role: 'admin';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -166,58 +164,47 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "movies".
+ * via the `definition` "review".
  */
-export interface Movie {
+export interface Review {
   id: string;
-  title: string;
-  description?: string | null;
+  movieTitle: string;
   releaseYear: number;
-  director?: string | null;
-  cover?: (string | null) | Media;
-  video?: (string | null) | Media;
+  genre:
+    | 'Azione'
+    | 'Commedia'
+    | 'Drammatico'
+    | 'Thriller'
+    | 'Horror'
+    | 'Fantasy'
+    | 'Animazione'
+    | 'Documentario'
+    | 'Altro';
   actors?:
     | {
-        actorName?: string | null;
+        name: string;
         id?: string | null;
       }[]
     | null;
-  genre: (
-    | 'drammatico'
-    | 'storico'
-    | 'fantascienza'
-    | 'commedia'
-    | 'azione'
-    | 'avventura'
-    | 'horror'
-    | 'thriller'
-    | 'giallo'
-    | 'romantico'
-    | 'animazione'
-    | 'documentario'
-    | 'musicale'
-    | 'fantasy'
-    | 'biografico'
-    | 'crime'
-    | 'western'
-    | 'famiglia'
-  )[];
+  writer: string | Writer;
+  title: string;
+  content: string;
+  coverImage?: (string | null) | Media;
+  votes?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reviews".
+ * via the `definition` "writers".
  */
-export interface Review {
+export interface Writer {
   id: string;
-  movie: string | Movie;
-  createdBy: string | User;
-  title: string;
-  content?: string | null;
-  rating: number;
-  views?: number | null;
-  votes?: number | null;
+  name: string;
+  bio?: string | null;
+  photo?: (string | null) | Media;
+  voteCount?: number | null;
+  voteTotal?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -228,8 +215,11 @@ export interface Review {
 export interface Article {
   id: string;
   title: string;
+  writer: string | Writer;
+  articleType: 'cinema' | 'gossip' | 'attualita' | 'premi' | 'backstage' | 'intervista' | 'generale';
   content: string;
-  movie?: (string | null) | Movie;
+  coverImage?: (string | null) | Media;
+  movieTitle?: string | null;
   actors?:
     | {
         actorName?: string | null;
@@ -259,6 +249,7 @@ export interface Article {
         | 'famiglia'
       )[]
     | null;
+  votes?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -269,6 +260,7 @@ export interface Article {
 export interface Newsletter {
   id: string;
   email: string;
+  confirmed?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -288,11 +280,7 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
-        relationTo: 'movies';
-        value: string | Movie;
-      } | null)
-    | ({
-        relationTo: 'reviews';
+        relationTo: 'review';
         value: string | Review;
       } | null)
     | ({
@@ -302,6 +290,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'newsletter';
         value: string | Newsletter;
+      } | null)
+    | ({
+        relationTo: 'writers';
+        value: string | Writer;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -351,8 +343,6 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   username?: T;
-  avatarUrl?: T;
-  bio?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -384,36 +374,22 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "movies_select".
+ * via the `definition` "review_select".
  */
-export interface MoviesSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
+export interface ReviewSelect<T extends boolean = true> {
+  movieTitle?: T;
   releaseYear?: T;
-  director?: T;
-  cover?: T;
-  video?: T;
+  genre?: T;
   actors?:
     | T
     | {
-        actorName?: T;
+        name?: T;
         id?: T;
       };
-  genre?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "reviews_select".
- */
-export interface ReviewsSelect<T extends boolean = true> {
-  movie?: T;
-  createdBy?: T;
+  writer?: T;
   title?: T;
   content?: T;
-  rating?: T;
-  views?: T;
+  coverImage?: T;
   votes?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -424,8 +400,11 @@ export interface ReviewsSelect<T extends boolean = true> {
  */
 export interface ArticlesSelect<T extends boolean = true> {
   title?: T;
+  writer?: T;
+  articleType?: T;
   content?: T;
-  movie?: T;
+  coverImage?: T;
+  movieTitle?: T;
   actors?:
     | T
     | {
@@ -434,6 +413,7 @@ export interface ArticlesSelect<T extends boolean = true> {
       };
   director?: T;
   genre?: T;
+  votes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -443,6 +423,20 @@ export interface ArticlesSelect<T extends boolean = true> {
  */
 export interface NewsletterSelect<T extends boolean = true> {
   email?: T;
+  confirmed?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "writers_select".
+ */
+export interface WritersSelect<T extends boolean = true> {
+  name?: T;
+  bio?: T;
+  photo?: T;
+  voteCount?: T;
+  voteTotal?: T;
   updatedAt?: T;
   createdAt?: T;
 }

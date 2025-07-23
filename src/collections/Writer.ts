@@ -2,6 +2,9 @@ import { CollectionConfig } from 'payload'
 
 export const Writers: CollectionConfig = {
   slug: 'writers',
+  admin: {
+    useAsTitle: 'name', // Mostra il nome nel pannello admin e nei relationship field
+  },
   access: {
     create: ({ req }) => req.user?.role === 'admin',
     read: () => true,

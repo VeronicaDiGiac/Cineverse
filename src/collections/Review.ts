@@ -58,13 +58,13 @@ export const Review: CollectionConfig = {
     },
 
     // Questa tabella serve per collegare le recensioni al profilo di chi l'ha scritta anche se è gestita da un unico admin. Quindi un admin gestisce tutti i profili degli scrittori. la tabella scrittori deve essere ancora creata, motivo del commento.
-    //    {
-    //   name: 'writer',
-    //   type: 'relationship',
-    //   relationTo: 'writers',
-    //   required: true,
-    //   label: 'Scrittore',
-    // },
+    {
+      name: 'writer',
+      type: 'relationship',
+      relationTo: 'writers',
+      required: true,
+      label: 'Scrittore',
+    },
 
     // Titolo recensione
     {
@@ -92,6 +92,10 @@ export const Review: CollectionConfig = {
       name: 'votes',
       type: 'number',
       defaultValue: 0,
+      // Admin non deve poter inserire voti manuali perchè quello è compito dell utente anonimo lato frontend
+      admin: {
+        readOnly: true,
+      },
     },
   ],
   // Data di pubblicazione automatica
@@ -106,16 +110,14 @@ export const Review: CollectionConfig = {
           throw new Error('Utente non autenticato')
         }
 
-        data.createdBy = req.user.id
-
         // Impedisci che lo stesso scrittore recensisca 2 volte lo stesso film
         const existing = await req.payload.find({
-          collection: 'reviews',
+          collection: 'review',
           where: {
             and: [
               { movieTitle: { equals: data.movieTitle } },
               { releaseYear: { equals: data.releaseYear } },
-              { createdBy: { equals: req.user.id } },
+              { writer: { equals: data.writer } },
             ],
           },
         })
@@ -140,10 +142,10 @@ export const Review: CollectionConfig = {
           return Response.json({ error: 'Missing ID' }, { status: 400 })
         }
 
-        const review = await req.payload.findByID({ collection: 'reviews', id })
+        const review = await req.payload.findByID({ collection: 'review', id })
 
         await req.payload.update({
-          collection: 'reviews',
+          collection: 'review',
           id,
           data: { votes: (review.votes || 0) + 1 },
         })
@@ -153,26 +155,26 @@ export const Review: CollectionConfig = {
     },
 
     // Visualizzazione
-    {
-      path: '/view',
-      method: 'post',
-      handler: async (req: PayloadRequest) => {
-        const { id } = req.query
-        if (!id || typeof id !== 'string') {
-          return Response.json({ error: 'Missing ID' }, { status: 400 })
-        }
+    // {
+    //   path: '/view',
+    //   method: 'post',
+    //   handler: async (req: PayloadRequest) => {
+    //     const { id } = req.query
+    //     if (!id || typeof id !== 'string') {
+    //       return Response.json({ error: 'Missing ID' }, { status: 400 })
+    //     }
 
-        const review = await req.payload.findByID({ collection: 'reviews', id })
+    //     const review = await req.payload.findByID({ collection: 'review', id })
 
-        await req.payload.update({
-          collection: 'reviews',
-          id,
-          data: { views: (review.views || 0) + 1 },
-        })
+    //     await req.payload.update({
+    //       collection: 'review',
+    //       id,
+    //       data: { views: (review.views || 0) + 1 },
+    //     })
 
-        return Response.json({ success: true })
-      },
-    },
+    //     return Response.json({ success: true })
+    //   },
+    // },
 
     // Top recensioni
     {
@@ -182,13 +184,13 @@ export const Review: CollectionConfig = {
         const limit = Number(req.query.limit) || 5
 
         const mostRead = await req.payload.find({
-          collection: 'reviews',
+          collection: 'review',
           sort: '-views',
           limit,
         })
 
         const mostVoted = await req.payload.find({
-          collection: 'reviews',
+          collection: 'review',
           sort: '-votes',
           limit,
         })
@@ -211,7 +213,7 @@ export const Review: CollectionConfig = {
         }
 
         const reviews = await req.payload.find({
-          collection: 'reviews',
+          collection: 'review',
           where: { movieTitle: { equals: title } },
         })
 
@@ -230,7 +232,7 @@ export const Review: CollectionConfig = {
         }
 
         const reviews = await req.payload.find({
-          collection: 'reviews',
+          collection: 'review',
           where: { genre: { equals: genre } },
         })
 
@@ -249,7 +251,7 @@ export const Review: CollectionConfig = {
         }
 
         const reviews = await req.payload.find({
-          collection: 'reviews',
+          collection: 'review',
           where: { releaseYear: { equals: Number(year) } },
         })
 
