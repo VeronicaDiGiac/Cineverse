@@ -4,25 +4,14 @@ export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   admin: {
-    useAsTitle: 'username',
-    hidden: ({ user }) => user?.role !== 'admin',
+    useAsTitle: 'email', // o username se lo mantieni
   },
-
   access: {
-    read: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { id: { equals: user.id } }
-    },
-    create: () => true,
-    update: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { id: { equals: user.id } }
-    },
-    delete: ({ req: { user } }) => user?.role === 'admin',
+    read: ({ req }) => req.user?.role === 'admin',
+    create: ({ req }) => req.user?.role === 'admin',
+    update: ({ req }) => req.user?.role === 'admin',
+    delete: ({ req }) => req.user?.role === 'admin',
   },
-
   fields: [
     {
       name: 'username',
@@ -31,46 +20,15 @@ export const Users: CollectionConfig = {
       unique: true,
     },
     {
-      name: 'avatarUrl',
-      type: 'upload',
-      relationTo: 'media',
-    },
-    {
-      name: 'bio',
-      type: 'textarea',
-    },
-    {
       name: 'role',
       type: 'select',
-      options: [
-        { label: 'Admin', value: 'admin' },
-        { label: 'User', value: 'user' },
-      ],
-      defaultValue: 'user',
       required: true,
-      admin: { description: "Ruolo definito dall'admin" },
-      access: {
-        update: ({ req }) => req.user?.role === 'admin',
+      defaultValue: 'admin',
+      options: [{ label: 'Admin', value: 'admin' }],
+      admin: {
+        readOnly: true,
+        description: 'Ruolo fisso: solo admin',
       },
     },
   ],
-
-  hooks: {
-    beforeOperation: [
-      async ({ args, operation }) => {
-        if (operation === 'create' && !args.req?.user && args.data?.role === 'admin') {
-          args.data.role = 'user'
-        }
-        return args
-      },
-    ],
-    beforeChange: [
-      ({ req, data }) => {
-        if (data.role === 'admin' && req.user?.role !== 'admin') {
-          data.role = 'user'
-        }
-        return data
-      },
-    ],
-  },
 }

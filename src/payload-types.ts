@@ -71,7 +71,6 @@ export interface Config {
     media: Media;
     movies: Movie;
     reviews: Review;
-    follows: Follow;
     articles: Article;
     newsletter: Newsletter;
     'payload-locked-documents': PayloadLockedDocument;
@@ -84,7 +83,6 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     movies: MoviesSelect<false> | MoviesSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
-    follows: FollowsSelect<false> | FollowsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     newsletter: NewsletterSelect<false> | NewsletterSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -214,22 +212,12 @@ export interface Movie {
 export interface Review {
   id: string;
   movie: string | Movie;
+  createdBy: string | User;
   title: string;
   content?: string | null;
   rating: number;
   views?: number | null;
   votes?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "follows".
- */
-export interface Follow {
-  id: string;
-  follower: string | User;
-  following: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -306,10 +294,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'reviews';
         value: string | Review;
-      } | null)
-    | ({
-        relationTo: 'follows';
-        value: string | Follow;
       } | null)
     | ({
         relationTo: 'articles';
@@ -425,21 +409,12 @@ export interface MoviesSelect<T extends boolean = true> {
  */
 export interface ReviewsSelect<T extends boolean = true> {
   movie?: T;
+  createdBy?: T;
   title?: T;
   content?: T;
   rating?: T;
   views?: T;
   votes?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "follows_select".
- */
-export interface FollowsSelect<T extends boolean = true> {
-  follower?: T;
-  following?: T;
   updatedAt?: T;
   createdAt?: T;
 }

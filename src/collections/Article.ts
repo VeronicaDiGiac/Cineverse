@@ -1,13 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import type { PayloadRequest } from 'payload'
-import { headersWithCors } from 'payload'
 
 export const Articles: CollectionConfig = {
   slug: 'articles',
-  admin: {
-    useAsTitle: 'title',
-    hidden: ({ user }) => user?.role !== 'admin',
-  },
 
   access: {
     create: ({ req }) => req.user?.role === 'admin',
@@ -28,10 +23,11 @@ export const Articles: CollectionConfig = {
       required: true,
     },
     {
-      name: 'movie',
-      type: 'relationship',
-      relationTo: 'movies',
+      name: 'coverImage',
+      type: 'upload',
+      relationTo: 'media',
       required: false,
+      label: 'Immagine principale dell’articolo',
     },
     {
       name: 'actors',
@@ -77,28 +73,7 @@ export const Articles: CollectionConfig = {
   timestamps: true,
 
   endpoints: [
-    // Filtro per Movie
-    {
-      path: '/byMovie',
-      method: 'get',
-      handler: async (req: PayloadRequest) => {
-        const { movieId } = req.query
-
-        if (!movieId) {
-          return Response.json({ error: 'Missing movieId' }, { status: 400 })
-        }
-
-        const articles = await req.payload.find({
-          collection: 'articles',
-          where: { movie: { equals: movieId } },
-          depth: 1,
-        })
-
-        return Response.json(articles)
-      },
-    },
-
-    // Filtro per Actor
+    // Filtro per attore
     {
       path: '/byActor',
       method: 'get',
@@ -112,13 +87,14 @@ export const Articles: CollectionConfig = {
         const articles = await req.payload.find({
           collection: 'articles',
           where: { 'actors.actorName': { equals: actorName } },
+          sort: '-createdAt',
         })
 
         return Response.json(articles)
       },
     },
 
-    // Filtro per Director
+    // Filtro per regista
     {
       path: '/byDirector',
       method: 'get',
@@ -132,13 +108,14 @@ export const Articles: CollectionConfig = {
         const articles = await req.payload.find({
           collection: 'articles',
           where: { director: { equals: director } },
+          sort: '-createdAt',
         })
 
         return Response.json(articles)
       },
     },
 
-    // Filtro per Genre
+    // Filtro per genere
     {
       path: '/byGenre',
       method: 'get',
@@ -152,6 +129,7 @@ export const Articles: CollectionConfig = {
         const articles = await req.payload.find({
           collection: 'articles',
           where: { genre: { contains: genre } },
+          sort: '-createdAt',
         })
 
         return Response.json(articles)
