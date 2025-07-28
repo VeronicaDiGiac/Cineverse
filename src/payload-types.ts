@@ -191,6 +191,7 @@ export interface Review {
   content: string;
   coverImage?: (string | null) | Media;
   votes?: number | null;
+  views?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -250,6 +251,7 @@ export interface Article {
       )[]
     | null;
   votes?: number | null;
+  views?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -391,6 +393,7 @@ export interface ReviewSelect<T extends boolean = true> {
   content?: T;
   coverImage?: T;
   votes?: T;
+  views?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -414,6 +417,7 @@ export interface ArticlesSelect<T extends boolean = true> {
   director?: T;
   genre?: T;
   votes?: T;
+  views?: T;
   updatedAt?: T;
   createdAt?: T;
 }

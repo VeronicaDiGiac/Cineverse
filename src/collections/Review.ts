@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import type { PayloadRequest } from 'payload'
+import { sendNewsletterEmail } from '../app/utils/sendNewsletterEmail'
 
 export const Review: CollectionConfig = {
   slug: 'review',
@@ -97,6 +98,14 @@ export const Review: CollectionConfig = {
         readOnly: true,
       },
     },
+    {
+      name: 'views',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        readOnly: true,
+      },
+    },
   ],
   // Data di pubblicazione automatica
   timestamps: true,
@@ -129,6 +138,29 @@ export const Review: CollectionConfig = {
         return data
       },
     ],
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return
+
+        const subscribers = await req.payload.find({
+          collection: 'newsletter',
+          where: { confirmed: { equals: true } },
+          limit: 999,
+        })
+
+        const subject = `⭐️ Nuova recensione: ${doc.movieTitle}`
+        const content = `
+        <p>Abbiamo appena pubblicato una nuova recensione del film <strong>${doc.movieTitle}</strong> (${doc.releaseYear})</p>
+        <h3>${doc.title}</h3>
+        <p>${doc.content?.slice(0, 150)}...</p>
+        <p><a href="https://tua-app.it/recensioni/${doc.id}">Leggi la recensione completa</a></p>
+      `
+
+        await Promise.all(
+          subscribers.docs.map((user) => sendNewsletterEmail(user.email, subject, content)),
+        )
+      },
+    ],
   },
 
   endpoints: [
@@ -154,27 +186,27 @@ export const Review: CollectionConfig = {
       },
     },
 
-    // Visualizzazione
-    // {
-    //   path: '/view',
-    //   method: 'post',
-    //   handler: async (req: PayloadRequest) => {
-    //     const { id } = req.query
-    //     if (!id || typeof id !== 'string') {
-    //       return Response.json({ error: 'Missing ID' }, { status: 400 })
-    //     }
+    //  Visualizzazione
+    {
+      path: '/view',
+      method: 'post',
+      handler: async (req: PayloadRequest) => {
+        const { id } = req.query
+        if (!id || typeof id !== 'string') {
+          return Response.json({ error: 'Missing ID' }, { status: 400 })
+        }
 
-    //     const review = await req.payload.findByID({ collection: 'review', id })
+        const review = await req.payload.findByID({ collection: 'review', id })
 
-    //     await req.payload.update({
-    //       collection: 'review',
-    //       id,
-    //       data: { views: (review.views || 0) + 1 },
-    //     })
+        await req.payload.update({
+          collection: 'review',
+          id,
+          data: { views: (review.views || 0) + 1 },
+        })
 
-    //     return Response.json({ success: true })
-    //   },
-    // },
+        return Response.json({ success: true })
+      },
+    },
 
     // Top recensioni
     {

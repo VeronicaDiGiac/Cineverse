@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import type { PayloadRequest } from 'payload'
+import { sendNewsletterEmail } from '../app/utils/sendNewsletterEmail'
 
 export const Articles: CollectionConfig = {
   slug: 'articles',
@@ -110,6 +111,14 @@ export const Articles: CollectionConfig = {
         readOnly: true,
       },
     },
+    {
+      name: 'views',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        readOnly: true, // L’admin non può modificarlo manualmente
+      },
+    },
   ],
 
   timestamps: true,
@@ -198,35 +207,121 @@ export const Articles: CollectionConfig = {
         return Response.json(articles)
       },
     },
+    {
+      path: '/vote',
+      method: 'post',
+      handler: async (req: PayloadRequest) => {
+        const { id } = req.query
+
+        if (!id || typeof id !== 'string') {
+          return Response.json({ error: 'Missing ID' }, { status: 400 })
+        }
+
+        const article = await req.payload.findByID({ collection: 'articles', id })
+
+        if (!article) {
+          return Response.json({ error: 'Article not found' }, { status: 404 })
+        }
+
+        await req.payload.update({
+          collection: 'articles',
+          id,
+          data: { votes: (article.votes || 0) + 1 },
+        })
+
+        return Response.json({ success: true })
+      },
+    },
+    {
+      path: '/view',
+      method: 'post',
+      handler: async (req: PayloadRequest) => {
+        const { id } = req.query
+
+        if (!id || typeof id !== 'string') {
+          return Response.json({ error: 'Missing ID' }, { status: 400 })
+        }
+
+        const article = await req.payload.findByID({ collection: 'articles', id })
+
+        if (!article) {
+          return Response.json({ error: 'Article not found' }, { status: 404 })
+        }
+
+        await req.payload.update({
+          collection: 'articles',
+          id,
+          data: {
+            views: (article.views || 0) + 1,
+          },
+        })
+
+        return Response.json({ success: true })
+      },
+    },
+    {
+      path: '/top',
+      method: 'get',
+      handler: async (req: PayloadRequest) => {
+        const limit = Number(req.query.limit) || 5
+
+        const mostRead = await req.payload.find({
+          collection: 'articles',
+          sort: '-views',
+          limit,
+        })
+
+        return Response.json({ mostRead: mostRead.docs })
+      },
+    },
   ],
   hooks: {
     afterChange: [
       async ({ doc, operation, req }) => {
-        // Solo se il documento è stato aggiornato (non creato)
-        if (operation !== 'update') return
-
         const writerId = doc.writer
-        if (!writerId) return
 
-        // Prendi tutte le review scritte da questo autore
-        const reviews = await req.payload.find({
-          collection: 'articles',
-          where: { writer: { equals: writerId } },
-        })
+        // Aggiorna voti autore solo se è stato fatto un update
+        if (operation === 'update') {
+          if (!writerId) return
 
-        // Somma voti e conteggio
-        const voteTotal = reviews.docs.reduce((sum, r) => sum + (r.votes || 0), 0)
-        const voteCount = reviews.docs.length
+          const reviews = await req.payload.find({
+            collection: 'articles',
+            where: { writer: { equals: writerId } },
+          })
 
-        // Aggiorna lo scrittore
-        await req.payload.update({
-          collection: 'writers',
-          id: writerId,
-          data: {
-            voteTotal,
-            voteCount,
-          },
-        })
+          const voteTotal = reviews.docs.reduce((sum, r) => sum + (r.votes || 0), 0)
+          const voteCount = reviews.docs.length
+
+          await req.payload.update({
+            collection: 'writers',
+            id: writerId,
+            data: {
+              voteTotal,
+              voteCount,
+            },
+          })
+        }
+
+        // Invia newsletter solo se è stato creato un nuovo articolo
+        if (operation === 'create') {
+          const subscribers = await req.payload.find({
+            collection: 'newsletter',
+            where: { confirmed: { equals: true } },
+            limit: 999,
+          })
+
+          const subject = `📰 Nuovo articolo: ${doc.title}`
+          const content = `
+          <p>È stato pubblicato un nuovo articolo nella categoria <strong>${doc.articleType}</strong>:</p>
+          <h2>${doc.title}</h2>
+          <p>${doc.content?.slice(0, 150)}...</p>
+          <p><a href="https://tua-app.it/articoli/${doc.id}">Leggi l'articolo completo</a></p>
+        `
+
+          await Promise.all(
+            subscribers.docs.map((user) => sendNewsletterEmail(user.email, subject, content)),
+          )
+        }
       },
     ],
   },
