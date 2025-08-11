@@ -290,5 +290,46 @@ export const Review: CollectionConfig = {
         return Response.json(reviews)
       },
     },
+    // Filtro per attore
+    {
+      path: '/byActor',
+      method: 'get',
+      handler: async (req: PayloadRequest) => {
+        const { actor } = req.query
+        if (!actor || typeof actor !== 'string') {
+          return Response.json({ error: 'Missing actor' }, { status: 400 })
+        }
+
+        const reviews = await req.payload.find({
+          collection: 'review',
+          where: {
+            'actors.name': { equals: actor },
+          },
+        })
+
+        return Response.json(reviews)
+      },
+    },
+
+    // Filtro per scrittore
+    {
+      path: '/byWriter',
+      method: 'get',
+      handler: async (req: PayloadRequest) => {
+        const { writerId } = req.query
+        if (!writerId || typeof writerId !== 'string') {
+          return Response.json({ error: 'Missing writerId' }, { status: 400 })
+        }
+
+        const reviews = await req.payload.find({
+          collection: 'review',
+          where: {
+            writer: { equals: writerId },
+          },
+        })
+
+        return Response.json(reviews)
+      },
+    },
   ],
 }

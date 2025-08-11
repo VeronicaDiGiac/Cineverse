@@ -211,10 +211,15 @@ export const Articles: CollectionConfig = {
       path: '/vote',
       method: 'post',
       handler: async (req: PayloadRequest) => {
-        const { id } = req.query
+        const body = await new Response(req.body).json() //  fix
+        const { id, voteValue } = body
 
         if (!id || typeof id !== 'string') {
           return Response.json({ error: 'Missing ID' }, { status: 400 })
+        }
+
+        if (!voteValue || typeof voteValue !== 'number' || voteValue < 1 || voteValue > 5) {
+          return Response.json({ error: 'Invalid vote value' }, { status: 400 })
         }
 
         const article = await req.payload.findByID({ collection: 'articles', id })
@@ -226,7 +231,9 @@ export const Articles: CollectionConfig = {
         await req.payload.update({
           collection: 'articles',
           id,
-          data: { votes: (article.votes || 0) + 1 },
+          data: {
+            votes: (article.votes || 0) + voteValue,
+          },
         })
 
         return Response.json({ success: true })
