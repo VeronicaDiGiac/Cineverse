@@ -58,7 +58,7 @@ export const Review: CollectionConfig = {
       ],
     },
 
-    // Questa tabella serve per collegare le recensioni al profilo di chi l'ha scritta anche se è gestita da un unico admin. Quindi un admin gestisce tutti i profili degli scrittori. la tabella scrittori deve essere ancora creata, motivo del commento.
+    // Questa tabella serve per collegare le recensioni al profilo di chi l'ha scritta anche se è gestita da un unico admin. Quindi un admin gestisce tutti i profili degli scrittori.
     {
       name: 'writer',
       type: 'relationship',
@@ -141,7 +141,6 @@ export const Review: CollectionConfig = {
     afterChange: [
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return
-
         const subscribers = await req.payload.find({
           collection: 'newsletter',
           where: { confirmed: { equals: true } },
