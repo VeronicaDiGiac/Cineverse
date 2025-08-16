@@ -131,20 +131,25 @@ export const Articles: CollectionConfig = {
       handler: async (req: PayloadRequest) => {
         const { actorName } = req.query
 
-        if (!actorName) {
+        if (!actorName || typeof actorName !== 'string') {
           return Response.json({ error: 'Missing actorName' }, { status: 400 })
         }
 
         const articles = await req.payload.find({
           collection: 'articles',
-          where: { 'actors.actorName': { equals: actorName } },
+          where: {
+            or: [
+              { title: { contains: actorName } },
+              { content: { contains: actorName } },
+              { 'actors.actorName': { contains: actorName } },
+            ],
+          },
           sort: '-createdAt',
         })
 
         return Response.json(articles)
       },
     },
-
     // Filtro per regista
     {
       path: '/byDirector',
