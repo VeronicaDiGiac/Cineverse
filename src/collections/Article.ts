@@ -29,7 +29,6 @@ export const Articles: CollectionConfig = {
       name: 'articleType',
       type: 'select',
       required: true,
-      defaultValue: 'generale',
       options: [
         { label: 'Cinema', value: 'cinema' },
         { label: 'Gossip', value: 'gossip' },
@@ -124,7 +123,7 @@ export const Articles: CollectionConfig = {
   timestamps: true,
 
   endpoints: [
-    // Filtro per attore
+    // Filtro per attore : WORKS
     {
       path: '/byActor',
       method: 'get',
@@ -150,7 +149,7 @@ export const Articles: CollectionConfig = {
         return Response.json(articles)
       },
     },
-    // Filtro per regista
+    // Filtro per regista: WORKS
     {
       path: '/byDirector',
       method: 'get',
@@ -163,7 +162,13 @@ export const Articles: CollectionConfig = {
 
         const articles = await req.payload.find({
           collection: 'articles',
-          where: { director: { equals: director } },
+          where: {
+            or: [
+              { director: { equals: director } },
+              { title: { contains: director } },
+              { content: { contains: director } },
+            ],
+          },
           sort: '-createdAt',
         })
 
@@ -171,7 +176,7 @@ export const Articles: CollectionConfig = {
       },
     },
 
-    // Filtro per genere
+    // Filtro per genere : WORKS
     {
       path: '/byGenre',
       method: 'get',
@@ -192,7 +197,7 @@ export const Articles: CollectionConfig = {
       },
     },
 
-    // Filtro per tipo articolo
+    // Filtro per tipo articolo : WORKS
     {
       path: '/byType',
       method: 'get',
@@ -212,6 +217,7 @@ export const Articles: CollectionConfig = {
         return Response.json(articles)
       },
     },
+    // TO FIX
     {
       path: '/vote',
       method: 'post',
@@ -244,6 +250,7 @@ export const Articles: CollectionConfig = {
         return Response.json({ success: true })
       },
     },
+    // TO TEST
     {
       path: '/view',
       method: 'post',
@@ -271,6 +278,8 @@ export const Articles: CollectionConfig = {
         return Response.json({ success: true })
       },
     },
+    // TO TEST
+
     {
       path: '/top',
       method: 'get',
